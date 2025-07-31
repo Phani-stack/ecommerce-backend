@@ -31,10 +31,10 @@ export const register = async (req, res) => {
          maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
-      res.status(201).json({ success: true, message: `User created with ${email}` });
+      return res.status(201).json({ success: true, message: `User created with ${email}` });
 
    } catch (error) {
-      res.status(500).json({ success: false, message: error });
+      return res.status(500).json({ success: false, message: error });
    }
 }
 

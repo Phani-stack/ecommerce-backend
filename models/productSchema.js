@@ -16,18 +16,25 @@ const productSchema = new mongoose.Schema({
     required: [true, "Product price is required"],
     min: [0, "Price cannot be negative"]
   },
-  image: {
+  thumbnail: {
     type: String,
     required: [true, "Product image is required"]
-  },
-  inCart: {
-    type: Boolean,
-    required: true,
-    default: false,
   },
   quantity: {
     type: Number,
     default: 0
+  },
+  category: {
+    type: String,
+  },
+  discount: {
+    type: Number
+  },
+  rating: {
+    type: Number
+  },
+  stock: {
+    type: Number
   }
 });
 

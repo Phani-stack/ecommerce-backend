@@ -28,6 +28,10 @@ async function updateStockOfProductDb(userId, productId, quantity) {
     return resp;
 }
 
+async function cartIdByUserIdDb(userId) {
+    const [id] = await pool.query("SELECT id FROM cart WHERE user_id = ?", [userId]);
+    return id;
+}
 
 
 
@@ -40,8 +44,9 @@ export async function createCart(request, response) {
 }
 
 export async function addProductToCart(request, response) {
-    const cartId = 1;
-    const productId = 1;
+    const cartId = await cartIdByUserIdDb(request.user.id);
+    console.log(cartId);
+    const productId = request.body;
     const quantity = request.body;
     const resp = await addProductToCartDb(cartId, productId, quantity);
     return response.status(200).json({response});

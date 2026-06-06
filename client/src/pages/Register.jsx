@@ -6,9 +6,12 @@ const Register = () => {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    function registerUser() {
-        register(name, email, password);
+    async function registerUser() {
+        const response = await register(name, email, password);
+        localStorage.setItem("token", response.token);
+        if (register.success) alert("User registed sucessfully");
     }
+
 
     return (
         <div>

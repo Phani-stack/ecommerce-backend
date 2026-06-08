@@ -1,5 +1,5 @@
 import pool from "../config/connectDB.js";
-
+import { productByIdFromDb } from "./product.controller.js";
 
 // database calls
 async function addProductToCartDb(cartId, productId, quantity) {
@@ -8,11 +8,22 @@ async function addProductToCartDb(cartId, productId, quantity) {
 }
 
 async function createCartDb(userId) {
-    const [reponse] = await pool.query("INSERT INTO cart(user_id) VALUES(?)", [userId]);
+    const [result] = await pool.query("INSERT INTO cart(user_id) VALUES(?)", [userId]);
+    return result.insertId;
 }
 
 async function cartProductsByUserIdDb(userId) {
-    const [products] = pool.query("SELECT * FROM cart c JOIN cart_items ci ON c.id = cart_items.cart_id WHERE c.userId = ?", [userId]);
+    const [products] = await pool.query(
+        `SELECT
+            p.*,
+            ci.quantity
+         FROM cart c
+         JOIN cart_items ci ON c.id = ci.cart_id
+         JOIN products p ON p.id = ci.product_id
+         WHERE c.user_id = ?`,
+        [userId]
+    );
+
     return products;
 }
 
@@ -29,8 +40,8 @@ async function updateStockOfProductDb(userId, productId, quantity) {
 }
 
 async function cartIdByUserIdDb(userId) {
-    const [id] = await pool.query("SELECT id FROM cart WHERE user_id = ?", [userId]);
-    return id;
+    const [rows] = await pool.query("SELECT id FROM cart WHERE user_id = ?", [userId]);
+    return rows.length ? rows[0].id : null;
 }
 
 
@@ -44,29 +55,47 @@ export async function createCart(request, response) {
 }
 
 export async function addProductToCart(request, response) {
-    const cartId = await cartIdByUserIdDb(request.user.id);
-    console.log(cartId);
-    const productId = request.body;
-    const quantity = request.body;
-    const resp = await addProductToCartDb(cartId, productId, quantity);
-    return response.status(200).json({response});
+    try {
+        const userId = request.user.id;
+        let cartId = await cartIdByUserIdDb(userId);
+        if (!cartId) {
+            cartId = await createCartDb(userId);
+        }
+        let { productId, quantity } = request.body;
+        productId = parseInt(productId);
+        quantity = parseInt(quantity);
+        const resp = await addProductToCartDb(
+            cartId,
+            productId,
+            quantity
+        );
+        return response.status(200).json({
+            message: "Product added to cart",
+            data: resp
+        });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
 }
 
 export async function cartProductsByUserId(request, response) {
-    const userId = 1;
+    const userId = request.user.id;
     const products = await cartProductsByUserIdDb(userId);
     return response.status(200).json(products);
 }
 
 export async function removeProductFromCart(request, response) {
-    const userId = 1;
+    const userId = request.user.id;
     const productId = request.body;
     const resp = await removeProductFromCartDb(userId, productId);
     return response.status(200).json(resp);
 }
 
 export async function updateStockOfProduct(request, response) {
-    const userId = 3;
+    const userId = request.user.id;
     const { productId, quantity } = request.body;
     const resp = await updateStockOfProductDb(userId, productId, quantity);
     return response.status(200).json(resp);

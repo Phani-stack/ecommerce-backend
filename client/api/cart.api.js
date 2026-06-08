@@ -17,3 +17,16 @@ export async function addProductToCart(productId) {
     );
     return response.data;
 }
+
+
+export async function cartProductsById() {
+    const response = await axios.get(baseurl + "/products",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+    console.log(response.data);
+    return response.data;
+}

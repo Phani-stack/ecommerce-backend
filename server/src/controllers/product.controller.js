@@ -6,7 +6,7 @@ async function productsFromDb() {
     return products;
 }
 
-async function productByIdFromDb(productId) {
+export async function productByIdFromDb(productId) {
     const [product] = await pool.query("select * from products p join categories c on p.category_id = c.id where p.id = ?", [productId]);
     const [images] = await pool.query("select image_url from products p join product_images i on p.id = i.product_id where p.id = ?", [productId]);
     return { product, images };

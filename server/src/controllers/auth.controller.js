@@ -60,6 +60,8 @@ export const register = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+
+
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
